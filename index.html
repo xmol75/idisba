@@ -1,1 +1,147 @@
-<!doctype html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Keynote</title><meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,width=device-width"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/></head><body id="body" bgcolor="black"><div id="stageArea"><div id="stage" class="stage"></div><div id="hyperlinkPlane" class="stage"></div></div><div id="slideshowNavigator"></div><div id="slideNumberControl"></div><div id="slideNumberDisplay"></div><div id="helpPlacard"></div><div id="waitingIndicator"><div id="waitingSpinner"></div></div><script src="assets/player/main.js"></script></body></html>
+<!doctype html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Idisba</title><meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,width=device-width"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><style>
+#navControls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+#navControls.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+#navControls button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#navControls button:hover {
+  background: rgba(255,255,255,0.3);
+}
+#navControls button:active {
+  transform: scale(0.92);
+  background: rgba(255,255,255,0.4);
+}
+#slideCounter {
+  position: fixed;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.6);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+#slideCounter.visible {
+  opacity: 1;
+}
+</style></head><body id="body" bgcolor="black"><div id="stageArea"><div id="stage" class="stage"></div><div id="hyperlinkPlane" class="stage"></div></div><div id="slideshowNavigator"></div><div id="slideNumberControl"></div><div id="slideNumberDisplay"></div><div id="helpPlacard"></div><div id="waitingIndicator"><div id="waitingSpinner"></div></div>
+
+<div id="navControls">
+  <button id="btnHome" title="Ir al inicio">⏮</button>
+  <button id="btnPrev" title="Anterior">◀</button>
+  <button id="btnNext" title="Siguiente">▶</button>
+</div>
+<div id="slideCounter"></div>
+
+<script src="assets/player/main.js"></script>
+<script>
+(function() {
+  var controls = document.getElementById('navControls');
+  var counter = document.getElementById('slideCounter');
+  var hideTimer;
+
+  function showControls() {
+    controls.classList.add('visible');
+    counter.classList.add('visible');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function() {
+      controls.classList.remove('visible');
+      counter.classList.remove('visible');
+    }, 3000);
+  }
+
+  function simulateKey(keyCode) {
+    var ev = new KeyboardEvent('keydown', {
+      keyCode: keyCode,
+      which: keyCode,
+      bubbles: true,
+      cancelable: true
+    });
+    document.dispatchEvent(ev);
+  }
+
+  function updateCounter() {
+    if (typeof UC !== 'undefined' && UC && UC.script) {
+      var idx = (UC.currentSlideIndex || 0) + 1;
+      var total = UC.script.slideCount || '?';
+      counter.textContent = idx + ' / ' + total;
+    }
+  }
+
+  // Navigation buttons
+  document.getElementById('btnNext').addEventListener('click', function(e) {
+    e.stopPropagation();
+    simulateKey(39); // Right arrow
+    setTimeout(updateCounter, 200);
+  });
+
+  document.getElementById('btnPrev').addEventListener('click', function(e) {
+    e.stopPropagation();
+    simulateKey(37); // Left arrow
+    setTimeout(updateCounter, 200);
+  });
+
+  document.getElementById('btnHome').addEventListener('click', function(e) {
+    e.stopPropagation();
+    simulateKey(36); // Home key
+    setTimeout(updateCounter, 200);
+  });
+
+  // Show controls on mouse move
+  document.addEventListener('mousemove', function() {
+    showControls();
+    updateCounter();
+  });
+
+  // Show controls on touch
+  document.addEventListener('touchstart', function() {
+    showControls();
+    updateCounter();
+  }, {passive: true});
+
+  // Update counter when slide changes
+  document.addEventListener('ShowController:SlideIndexDidChangeEvent', function() {
+    updateCounter();
+  });
+
+  // Initial update after load
+  setTimeout(function() {
+    updateCounter();
+    showControls();
+  }, 2000);
+})();
+</script>
+</body></html>
