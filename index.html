@@ -1,11 +1,11 @@
-<!doctype html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Idisba</title><meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,width=device-width"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><style>
+<!doctype html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>SmartAid – Eureka Day</title><meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,width=device-width"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><style>
 #navControls {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 12px;
+  gap: 10px;
   z-index: 9999;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -16,15 +16,15 @@
   pointer-events: auto;
 }
 #navControls button {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: rgba(255,255,255,0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -40,9 +40,14 @@
   transform: scale(0.92);
   background: rgba(255,255,255,0.4);
 }
+#navControls .separator {
+  width: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 8px 2px;
+}
 #slideCounter {
   position: fixed;
-  bottom: 76px;
+  bottom: 72px;
   left: 50%;
   transform: translateX(-50%);
   color: rgba(255,255,255,0.6);
@@ -63,6 +68,8 @@
   <button id="btnHome" title="Ir al inicio">⏮</button>
   <button id="btnPrev" title="Anterior">◀</button>
   <button id="btnNext" title="Siguiente">▶</button>
+  <div class="separator"></div>
+  <button id="btnFullscreen" title="Pantalla completa">⛶</button>
 </div>
 <div id="slideCounter"></div>
 
@@ -71,6 +78,7 @@
 (function() {
   var controls = document.getElementById('navControls');
   var counter = document.getElementById('slideCounter');
+  var btnFs = document.getElementById('btnFullscreen');
   var hideTimer;
 
   function showControls() {
@@ -101,24 +109,48 @@
     }
   }
 
+  function updateFullscreenButton() {
+    var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    btnFs.textContent = isFs ? '⛶' : '⛶';
+    btnFs.title = isFs ? 'Salir de pantalla completa' : 'Pantalla completa';
+  }
+
+  function toggleFullscreen(e) {
+    e.stopPropagation();
+    var el = document.documentElement;
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } else {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    }
+  }
+
   // Navigation buttons
   document.getElementById('btnNext').addEventListener('click', function(e) {
     e.stopPropagation();
-    simulateKey(39); // Right arrow
+    simulateKey(39);
     setTimeout(updateCounter, 200);
   });
 
   document.getElementById('btnPrev').addEventListener('click', function(e) {
     e.stopPropagation();
-    simulateKey(37); // Left arrow
+    simulateKey(37);
     setTimeout(updateCounter, 200);
   });
 
   document.getElementById('btnHome').addEventListener('click', function(e) {
     e.stopPropagation();
-    simulateKey(36); // Home key
+    simulateKey(36);
     setTimeout(updateCounter, 200);
   });
+
+  btnFs.addEventListener('click', toggleFullscreen);
+
+  // Update fullscreen button state
+  document.addEventListener('fullscreenchange', updateFullscreenButton);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 
   // Show controls on mouse move
   document.addEventListener('mousemove', function() {
